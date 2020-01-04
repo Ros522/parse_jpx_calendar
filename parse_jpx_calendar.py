@@ -1,8 +1,10 @@
+from datetime import datetime
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 
-def is_jpx_open(date):
+def is_jpx_open(date=datetime.now()):
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
@@ -14,9 +16,13 @@ def is_jpx_open(date):
     driver.get(f'http://www.jpx.co.jp/calendar/{date.strftime("%Y%m")}.html')
 
     selector = f'td.fc-day[data-date=\'{date.strftime("%Y-%m-%d")}\']'
-    bg = driver.find_element_by_css_selector(selector).get_attribute('style')
+    elm = driver.find_element_by_css_selector(selector)
+    c = elm.get_attribute('class').split(' ')
+    bg = elm.get_attribute('style')
     driver.close()
     driver.quit()
+    if 'fc-sat' in c or 'fc-sun' in c:
+        return False
     if 'background-color: rgb(239, 239, 239);' in bg:
         return False
     return True
